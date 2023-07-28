@@ -1,16 +1,20 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.MyThreadLocal;
 import com.sky.dto.EmployeeDTO;
 import com.sky.dto.EmployeeLoginDTO;
+import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -63,36 +68,59 @@ public class EmployeeServiceImpl implements EmployeeService {
         return employee;
     }
 
-
     /**
      * 新增员工
-      * @param employeeDTO
+     *
+     * @param employeeDTO
      */
     @Override
     public Result save(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
-        employee=employee.builder()
+        employee = employee.builder()
+                //设置账号的状态 默认是正常的 1是正常的  0是锁定的
                 .status(StatusConstant.ENABLE)
+                // 设置用户密码(密码进行加密)
                 .password(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()))
                 .createTime(LocalDateTime.now())
                 .updateTime(LocalDateTime.now())
+                //设置当前记录创建人id和修改人id
                 .createUser(MyThreadLocal.getCurrentId())
                 .updateUser(MyThreadLocal.getCurrentId()).build();
         // 对象属性拷贝
         BeanUtils.copyProperties(employeeDTO, employee);
-       /* // 设置账号的状态 默认是正常的 1是正常的  0是锁定的
-        employee.setStatus(StatusConstant.ENABLE);
-        // 设置用户密码(密码进行加密)
-        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes()));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        //设置当前记录创建人id和修改人id
-        employee.setCreateUser(10l);
-        employee.setUpdateUser(10l);*/
         int count = employeeMapper.insert(employee);
         if (count > 0) {
             return Result.success();
         }
         return Result.error("新增失败");
+    }
+
+    @Override
+    public PageResult queryEmployee(EmployeePageQueryDTO employeePageQueryDTO) {
+        //开始分页查询
+        PageHelper.startPage(employeePageQueryDTO.getPage(), employeePageQueryDTO.getPageSize());
+        Page<Employee> page = employeeMapper.pageQuery(employeePageQueryDTO);
+        long total = page.getTotal();
+        List<Employee> records = page.getResult();
+        return new PageResult(total, records);
+    }
+
+    /**
+     * 启用和禁用员工账号
+     *
+     * @param status
+     * @param id
+     * @return
+     */
+    @Override
+    public Result settingStatus(Integer status, Long id) {
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id).build();
+        int count = employeeMapper.update(employee);
+        if(count>0){
+            return Result.success("修改成功");
+        }
+        return Result.error("失败");
     }
 }
