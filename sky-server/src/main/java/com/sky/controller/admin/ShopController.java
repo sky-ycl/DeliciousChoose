@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
-import static com.sky.constant.RedisConstant.SHOP_STATUS;
 import static com.sky.constant.RedisConstant.SHOP_STATUS_KEY;
 
 @RestController("adminShopUserController")
@@ -23,23 +22,25 @@ public class ShopController {
 
     /**
      * 设置店铺的状态
+     *
      * @return
      */
     @PutMapping("/{status}")
     @ApiOperation("设置店铺的状态")
-    public Result setShopStatus(@PathVariable("status") Integer status){
-        stringRedisTemplate.opsForValue().set(SHOP_STATUS_KEY,status.toString());
+    public Result setShopStatus(@PathVariable("status") Integer status) {
+        stringRedisTemplate.opsForValue().set(SHOP_STATUS_KEY, status.toString());
         return Result.success();
     }
 
     /**
      * 获取店铺的状态
+     *
      * @return
      */
     @GetMapping("/status")
     @ApiOperation("获取店铺的状态")
-    public Result getShopStatus(){
+    public Result getShopStatus() {
         String status = stringRedisTemplate.opsForValue().get(SHOP_STATUS_KEY);
-        return Result.success(status);
+        return Result.success(Integer.parseInt(status));
     }
 }
