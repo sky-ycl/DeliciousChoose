@@ -13,7 +13,7 @@ import static com.sky.constant.RedisConstant.SHOP_STATUS_KEY;
 
 @RestController("userShopController")
 @Api(tags = "店铺相关接口")
-@RequestMapping("/admin/user")
+@RequestMapping("/user/shop")
 @Slf4j
 public class ShopController {
 

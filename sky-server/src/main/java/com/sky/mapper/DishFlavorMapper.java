@@ -1,9 +1,6 @@
 package com.sky.mapper;
 
-import com.github.pagehelper.Page;
-import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.DishFlavor;
-import com.sky.vo.DishVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -18,4 +15,12 @@ public interface DishFlavorMapper {
      * @param ids
      */
     void deleteByDishIds(List<Long> ids);
+
+
+    /**
+     * 通过菜品id来查询口味
+     * @param id
+     * @return
+     */
+    List<DishFlavor> getByDishId(Long id);
 }

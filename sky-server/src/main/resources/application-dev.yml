@@ -11,3 +11,6 @@ sky:
     access-key-id: LTAI5tRqxjBnknouz6sWbA5U
     access-key-secret: ExxcB42UW7S3u6LrQeCkSIBfzwjpzS
     bucket-name: sky-boy
+  wechat:
+    appid: wxa720c670630ae622
+    secret: 7b5f5f3e4e2b3001e356dfdb7f00483f
