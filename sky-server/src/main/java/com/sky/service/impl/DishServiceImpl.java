@@ -1,5 +1,10 @@
 package com.sky.service.impl;
 
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONUtil;
+import com.alibaba.druid.support.json.JSONUtils;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
@@ -18,12 +23,15 @@ import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.sky.constant.RedisConstant.DISH_KEY;
 
 @Service
 @Slf4j
@@ -38,9 +46,11 @@ public class DishServiceImpl implements DishService {
     @Resource
     private SetMealDishMapper setMealDishMapper;
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
     /**
      * 新增菜品和对应的口味
-     *
      * @param dishDTO
      */
     @Override
@@ -103,7 +113,7 @@ public class DishServiceImpl implements DishService {
             // 判断删除的菜品是否被套餐关联
             if (isSale(ids) && isAssociate(ids)) {
                 // 删除菜品后 口味也要删除
-                ids.forEach(id->{
+                ids.forEach(id -> {
                     dishMapper.deleteByIds(ids);
                     dishFlavorMapper.deleteByDishIds(ids);
                 });
@@ -138,30 +148,38 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 条件查询菜品和口味
+     *
      * @param dish
      * @return
      */
     public List<DishVO> listWithFlavor(Dish dish) {
-        List<Dish> dishList = dishMapper.list(dish);
-
+        // 构建key
+        String key = DISH_KEY + dish.getCategoryId();
+        // 查询redis是否有菜品缓存
+        String dishJSON = stringRedisTemplate.opsForValue().get(key);
         List<DishVO> dishVOList = new ArrayList<>();
+        if (dishJSON == null) { // redis中没有菜品缓存
+            List<Dish> dishList = dishMapper.list(dish);
+            for (Dish d : dishList) {
+                DishVO dishVO = new DishVO();
+                BeanUtils.copyProperties(d, dishVO);
 
-        for (Dish d : dishList) {
-            DishVO dishVO = new DishVO();
-            BeanUtils.copyProperties(d,dishVO);
+                //根据菜品id查询对应的口味
+                List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
 
-            //根据菜品id查询对应的口味
-            List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
-
-            dishVO.setFlavors(flavors);
-            dishVOList.add(dishVO);
+                dishVO.setFlavors(flavors);
+                dishVOList.add(dishVO);
+            }
+            dishJSON = JSONUtil.toJsonStr(dishVOList);
+            stringRedisTemplate.opsForValue().set(key,dishJSON);
         }
-
+        dishVOList = JSONObject.parseArray(dishJSON, DishVO.class);
         return dishVOList;
     }
 
     /**
      * 根据分类id查询菜品
+     *
      * @param categoryId
      * @return
      */
