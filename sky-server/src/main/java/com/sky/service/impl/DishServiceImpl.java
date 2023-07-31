@@ -128,7 +128,7 @@ public class DishServiceImpl implements DishService {
     //判断菜品是否是起售状态
     public boolean isSale(List<Long> ids) {
         ids.forEach(id -> {
-            Dish dish = dishMapper.selectDishStatus(id);
+            Dish dish = dishMapper.selectDish(id);
             if (dish.getStatus() == 1) { // 菜品属于起售状态
                 throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
             }

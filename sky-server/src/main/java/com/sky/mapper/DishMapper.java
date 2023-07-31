@@ -35,7 +35,7 @@ public interface DishMapper {
     int updateStatus(@Param("id") Long id , @Param("status") Integer status);
 
     @Select("select * from dish where id=#{id}")
-    Dish selectDishStatus(Long id);
+    Dish selectDish(Long id);
 
     /**
      * 删除菜品
