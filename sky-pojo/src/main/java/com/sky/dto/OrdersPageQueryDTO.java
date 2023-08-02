@@ -19,12 +19,13 @@ public class OrdersPageQueryDTO implements Serializable {
 
     private Integer status;
 
+    private Long userId;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime beginTime;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime endTime;
 
-    private Long userId;
 
 }
