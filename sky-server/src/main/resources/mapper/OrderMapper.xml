@@ -55,4 +55,49 @@
         </where>
         order by order_time desc
     </select>
+    <select id="selectSumAmountOfDay" resultType="java.lang.Double">
+        select sum(amount) from orders
+        <where>
+            <if test="begin!=null">
+                and order_time &gt; #{begin}
+            </if>
+            <if test="end!=null">
+                and order_time &lt; #{end}
+            </if>
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="getOrderCount" resultType="java.lang.Integer">
+        select count(id) from orders
+        <where>
+            <if test="begin!=null">
+                and order_time &gt; #{begin}
+            </if>
+            <if test="end!=null">
+                and order_time &lt; #{end}
+            </if>
+            <if test="status!=null">
+                and status=#{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="getSaleTop" resultType="com.sky.dto.GoodsSalesDTO">
+        SELECT d.`name`,sum(d.number) as number,o.order_time FROM `order_detail` d
+        left JOIN orders o
+        on d.order_id=o.id
+        where o.`status`=5
+        <if test="begin!=null">
+            and o.order_time &gt; #{begin}
+        </if>
+        <if test="end!=null">
+            and o.order_time &lt; #{end}
+        </if>
+        GROUP BY d.name
+        ORDER BY number desc
+        LIMIT 0,10
+    </select>
 </mapper>

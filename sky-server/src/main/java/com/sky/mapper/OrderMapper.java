@@ -1,14 +1,17 @@
 package com.sky.mapper;
 
 import com.github.pagehelper.Page;
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface OrderMapper {
@@ -59,5 +62,27 @@ public interface OrderMapper {
      */
     @Select("select count(id) from orders where status = #{status}")
     Integer countStatus(Integer status);
+
+    /**
+     * 查询每天的总营业额
+     * @param map
+     * @return
+     */
+    Double selectSumAmountOfDay(Map<String, Object> map);
+
+    /**
+     * 获取订单数量
+     * @param map1
+     * @return
+     */
+    Integer getOrderCount(Map<String, Object> map1);
+
+    /**
+     * 获取销售前10列表
+     * @param begin
+     * @param end
+     * @return
+     */
+    List<GoodsSalesDTO> getSaleTop(LocalDateTime begin, LocalDateTime end);
 }
 
