@@ -8,7 +8,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -72,10 +71,10 @@ public interface OrderMapper {
 
     /**
      * 获取订单数量
-     * @param map1
+     * @param map
      * @return
      */
-    Integer getOrderCount(Map<String, Object> map1);
+    Integer getOrderCount(Map<String, Object> map);
 
     /**
      * 获取销售前10列表
